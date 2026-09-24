@@ -399,6 +399,23 @@ button:disabled {
 
       <div class="upload-box">
 
+        <div class="notice">
+  <strong>Important — confirm the receiving account name</strong><br><br>
+  <strong>Alipay:</strong> F. BORIS KANGHA<br>
+  <strong>WeChat Pay:</strong> DASKETER<br><br>
+  Please make sure the receiving account name shown on your payment
+  screenshot matches the name for your selected payment method.
+</div>
+
+<label style="display:flex;align-items:flex-start;gap:10px;font-weight:normal;">
+  <input
+    id="receiverConfirmed"
+    type="checkbox"
+    style="width:20px;height:20px;margin-top:2px;flex-shrink:0;"
+  >
+  I confirm that the receiving account name shown on my screenshot
+  matches the required name above.
+</label>
         <strong>Upload Payment Screenshot</strong>
 
         <p class="small">
@@ -722,6 +739,10 @@ function compressImage(file) {
 }
 
 
+if (!document.getElementById("receiverConfirmed").checked) {
+  errorBox.textContent = "Please confirm that the receiving account name matches before submitting.";
+  return;
+}
 async function submitPaymentProof() {
 
   const button =
