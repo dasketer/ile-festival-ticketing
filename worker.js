@@ -739,9 +739,6 @@ function compressImage(file) {
 }
 
 
-if (!document.getElementById("receiverConfirmed").checked) {
-  errorBox.textContent = "Please confirm that the receiving account name matches before submitting.";
-  return;
 }
 async function submitPaymentProof() {
 
@@ -767,6 +764,10 @@ async function submitPaymentProof() {
     return;
   }
 
+if (!document.getElementById("receiverConfirmed").checked) {
+  errorBox.textContent = "Please confirm that the receiving account name matches before submitting.";
+  return;
+}
   button.disabled = true;
   button.textContent = "Uploading proof...";
 
