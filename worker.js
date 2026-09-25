@@ -48,6 +48,101 @@ function generateReference() {
     .join("")
     .toUpperCase();
 }
+function adminLoginPage() {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ILE FESTIVAL — Admin Login</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .box {
+      width: min(420px, 90%);
+      background: #111;
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid #333;
+      box-sizing: border-box;
+    }
+
+    .logo {
+      display: block;
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin: 0 auto 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #222;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border: 0;
+      border-radius: 8px;
+      background: #fff;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <img class="logo" src="/LION.jpeg" alt="ILE FESTIVAL">
+
+    <h1>Admin Login</h1>
+
+    <form method="POST" action="/admin/login">
+
+      <label>Username</label>
+      <input type="text" name="username" autocomplete="username" required>
+
+      <label>Password</label>
+      <input type="password" name="password" autocomplete="current-password" required>
+
+      <button type="submit">Sign In</button>
+
+    </form>
+  </div>
+</body>
+</html>
+`;
+}
 
 function htmlPage() {
   return `<!DOCTYPE html>
@@ -917,7 +1012,45 @@ export default {
       await setupDatabase(env);
 
       const url = new URL(request.url);
+      
+            if (request.method === "GET" && url.pathname === "/admin") {
+        return new Response(adminLoginPage(), {
+          headers: {
+            "Content-Type": "text/html; charset=UTF-8",
+            "Cache-Control": "no-store"
+          }
+        });
+      }
+      if (request.method === "POST" && url.pathname === "/admin/login") {
+        const form = await request.formData();
 
+        const username = String(form.get("username") || "");
+        const password = String(form.get("password") || "");
+
+        if (
+          username !== env.ADMIN_USERNAME ||
+          password !== env.ADMIN_PASSWORD
+        ) {
+          return new Response("Invalid admin credentials.", {
+            status: 401,
+            headers: {
+              "Content-Type": "text/plain; charset=UTF-8",
+              "Cache-Control": "no-store"
+            }
+          });
+        }
+
+        return new Response(
+          "Admin login successful. Dashboard coming next.",
+          {
+            headers: {
+              "Content-Type": "text/plain; charset=UTF-8",
+              "Cache-Control": "no-store"
+            }
+          }
+        );
+      }
+      
       /*
        * MAIN WEBSITE
        */
