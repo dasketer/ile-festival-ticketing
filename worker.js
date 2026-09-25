@@ -1,3 +1,4 @@
+// Admin login update
 const MAX_CLASSIC = 200;
 const MAX_VIP = 25;
 const MAX_PROOF_CHARS = 1500000;
