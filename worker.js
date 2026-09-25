@@ -738,8 +738,6 @@ function compressImage(file) {
 
 }
 
-
-}
 async function submitPaymentProof() {
 
   const button =
