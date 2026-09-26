@@ -503,15 +503,7 @@ button:disabled {
   screenshot matches the name for your selected payment method.
 </div>
 
-<label style="display:flex;align-items:flex-start;gap:10px;font-weight:normal;">
-  <input
-    id="receiverConfirmed"
-    type="checkbox"
-    style="width:20px;height:20px;margin-top:2px;flex-shrink:0;"
-  >
-  I confirm that the receiving account name shown on my screenshot
-  matches the required name above.
-</label>
+
         <strong>Upload Payment Screenshot</strong>
 
         <p class="small">
@@ -858,10 +850,6 @@ async function submitPaymentProof() {
     return;
   }
 
-if (!document.getElementById("receiverConfirmed").checked) {
-  errorBox.textContent = "Please confirm that the receiving account name matches before submitting.";
-  return;
-}
   button.disabled = true;
   button.textContent = "Uploading proof...";
 
