@@ -1009,35 +1009,50 @@ export default {
           }
         });
       }
-      if (request.method === "POST" && url.pathname === "/admin/login") {
-        const form = await request.formData();
+  if (request.method === "POST" && url.pathname === "/admin/login") {
+  const form = await request.formData();
 
-        const username = String(form.get("username") || "");
-        const password = String(form.get("password") || "");
+  const username = String(form.get("username") || "");
+  const password = String(form.get("password") || "");
 
-        if (
-          username !== env.ADMIN_USERNAME ||
-          password !== env.ADMIN_PASSWORD
-        ) {
-          return new Response("Invalid admin credentials.", {
-            status: 401,
-            headers: {
-              "Content-Type": "text/plain; charset=UTF-8",
-              "Cache-Control": "no-store"
-            }
-          });
-        }
-
-        return new Response(
-          "Admin login successful. Dashboard coming next.",
-          {
-            headers: {
-              "Content-Type": "text/plain; charset=UTF-8",
-              "Cache-Control": "no-store"
-            }
-          }
-        );
+  if (
+    username !== env.ADMIN_USERNAME ||
+    password !== env.ADMIN_PASSWORD
+  ) {
+    return new Response("Invalid admin credentials.", {
+      status: 401,
+      headers: {
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "no-store"
       }
+    });
+  }
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS admin_sessions (
+      token TEXT PRIMARY KEY,
+      username TEXT NOT NULL,
+      expires_at INTEGER NOT NULL
+    )
+  `).run();
+
+  const token = crypto.randomUUID();
+  const expiresAt = Date.now() + (8 * 60 * 60 * 1000);
+
+  await env.DB.prepare(`
+    INSERT INTO admin_sessions (token, username, expires_at)
+    VALUES (?, ?, ?)
+  `).bind(token, username, expiresAt).run();
+
+  return new Response("Admin login successful.", {
+    status: 302,
+    headers: {
+      "Location": "/admin/dashboard",
+      "Set-Cookie": `admin_session=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`,
+      "Cache-Control": "no-store"
+    }
+  });
+}
       
       /*
        * MAIN WEBSITE
