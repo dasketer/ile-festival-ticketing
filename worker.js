@@ -22,6 +22,22 @@ async function setupDatabase(env) {
     )
   `).run();
 
+    const ticketColumns = await env.DB.prepare(`
+    PRAGMA table_info(tickets)
+  `).all();
+
+  const hasEntranceToken =
+    ticketColumns.results.some(
+      column => column.name === "entrance_token"
+    );
+
+  if (!hasEntranceToken) {
+    await env.DB.prepare(`
+      ALTER TABLE tickets
+      ADD COLUMN entrance_token TEXT
+    `).run();
+  }
+
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,6 +46,8 @@ async function setupDatabase(env) {
     )
   `).run();
 }
+
+
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
