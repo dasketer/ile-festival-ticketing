@@ -1058,6 +1058,147 @@ export default {
        * MAIN WEBSITE
        */
 
+if (request.method === "GET" && url.pathname === "/admin/dashboard") {
+  const cookieHeader = request.headers.get("Cookie") || "";
+
+  const match = cookieHeader.match(/(?:^|;\s*)admin_session=([^;]+)/);
+  const token = match ? match[1] : "";
+
+  if (!token) {
+    return Response.redirect(new URL("/admin", request.url).toString(), 302);
+  }
+
+  const session = await env.DB.prepare(`
+    SELECT username, expires_at
+    FROM admin_sessions
+    WHERE token = ?
+  `).bind(token).first();
+
+  if (!session || Number(session.expires_at) < Date.now()) {
+    return new Response("Session expired. Please log in again.", {
+      status: 401,
+      headers: {
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "no-store"
+      }
+    });
+  }
+
+  const tickets = await env.DB.prepare(`
+    SELECT
+      id,
+      ticket_code,
+      ticket_type,
+      guest_name,
+      phone,
+      email,
+      payment_method,
+      payment_status,
+      ticket_status,
+      created_at,
+      approved_at
+    FROM tickets
+    ORDER BY id DESC
+  `).all();
+
+  const rows = tickets.results.map(ticket => `
+    <tr>
+      <td>${ticket.ticket_code || ""}</td>
+      <td>${ticket.guest_name || ""}</td>
+      <td>${ticket.ticket_type || ""}</td>
+      <td>${ticket.payment_method || ""}</td>
+      <td>${ticket.payment_status || ""}</td>
+      <td>${ticket.ticket_status || ""}</td>
+      <td>${ticket.created_at || ""}</td>
+    </tr>
+  `).join("");
+
+  return new Response(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ILE FESTIVAL — Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .card {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+
+    th {
+      background: #222;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>ILE FESTIVAL — Admin Dashboard</h1>
+
+  <p>Welcome, ${session.username}.</p>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Guest</th>
+          <th>Type</th>
+          <th>Payment</th>
+          <th>Payment Status</th>
+          <th>Ticket Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${rows || `
+          <tr>
+            <td colspan="7">No tickets found.</td>
+          </tr>
+        `}
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>
+  `, {
+    headers: {
+      "Content-Type": "text/html; charset=UTF-8",
+      "Cache-Control": "no-store"
+    }
+  });
+}
+      
       if (request.method === "GET" && url.pathname === "/") {
 
         return new Response(htmlPage(), {
