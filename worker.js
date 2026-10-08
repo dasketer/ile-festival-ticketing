@@ -1112,6 +1112,7 @@ if (request.method === "GET" && url.pathname === "/admin/dashboard") {
       email,
       payment_method,
       payment_status,
+      payment_proof,
       ticket_status,
       created_at,
       approved_at
@@ -1124,8 +1125,15 @@ if (request.method === "GET" && url.pathname === "/admin/dashboard") {
       <td>${ticket.ticket_code || ""}</td>
       <td>${ticket.guest_name || ""}</td>
       <td>${ticket.ticket_type || ""}</td>
-      <td>${ticket.payment_method || ""}</td>
+           <td>${ticket.payment_method || ""}</td>
       <td>${ticket.payment_status || ""}</td>
+      <td>
+        ${
+          ticket.payment_proof
+            ? `<a href="${ticket.payment_proof}" target="_blank">View Proof</a>`
+            : "No proof"
+        }
+      </td>
       <td>${ticket.ticket_status || ""}</td>
       <td>${ticket.created_at || ""}</td>
     </tr>
@@ -1192,6 +1200,7 @@ if (request.method === "GET" && url.pathname === "/admin/dashboard") {
           <th>Type</th>
           <th>Payment</th>
           <th>Payment Status</th>
+          <th>Payment Proof</th>
           <th>Ticket Status</th>
           <th>Created</th>
         </tr>
@@ -1200,7 +1209,7 @@ if (request.method === "GET" && url.pathname === "/admin/dashboard") {
       <tbody>
         ${rows || `
           <tr>
-            <td colspan="7">No tickets found.</td>
+            <td colspan="8">No tickets found.</td>
           </tr>
         `}
       </tbody>
